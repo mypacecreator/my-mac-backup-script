@@ -116,8 +116,7 @@ echo ""
 # ============================================================
 
 echo "--- claude -------------------------------------------"
-copy_file "$HOME/Library/Application Support/Claude/claude_desktop_config.json" \
-          "$DROPBOX_BASE/claude/claude_desktop_config.json"
+copy_dir  "$HOME/Library/Application Support/Claude" "$DROPBOX_BASE/claude/app-support"
 copy_file "$HOME/.claude.json"  "$DROPBOX_BASE/claude/.claude.json"
 copy_dir  "$HOME/.claude"       "$DROPBOX_BASE/claude/claude-dir"
 echo ""
@@ -128,6 +127,22 @@ echo ""
 
 echo "--- aws-backup ---------------------------------------"
 copy_dir "$HOME/.aws" "$DROPBOX_BASE/aws-backup"
+echo ""
+
+# ============================================================
+# Brewfile生成
+# ============================================================
+
+echo "--- Homebrew -----------------------------------------"
+if command -v brew >/dev/null 2>&1; then
+  mkdir -p "$DROPBOX_BASE"
+  brew bundle dump --file="$DROPBOX_BASE/Brewfile" --force
+  echo "[OK]   brew bundle dump -> $DROPBOX_BASE/Brewfile"
+  SUCCESS=$((SUCCESS + 1))
+else
+  echo "[SKIP] Homebrewがインストールされていません"
+  SKIP=$((SKIP + 1))
+fi
 echo ""
 
 # ============================================================
