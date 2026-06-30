@@ -53,8 +53,7 @@ echo "アプリインベントリを作成中..."
         | grep -oE '[^/]+\.app' \
         | head -1)
       if [ -n "$app_name" ]; then
-        cask_apps="$cask_apps
-$app_name"
+        cask_apps="$(printf '%s\n%s' "$cask_apps" "$app_name")"
       fi
     done
   fi
@@ -67,7 +66,8 @@ $app_name"
 
   # /Applications 内の .app を走査して未管理のものを出力
   # find で2階層分（直下 + サブフォルダ内）を再帰的に走査する
-  unmanaged_list=$(mktemp)
+  unmanaged_list=$(mktemp -t app-inventory)
+  trap 'rm -f "$unmanaged_list"' EXIT
   find /Applications -maxdepth 2 -name "*.app" -type d | while IFS= read -r app_path; do
     app_name=$(basename "$app_path")
     app_base="${app_name%.app}"
