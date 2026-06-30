@@ -44,14 +44,16 @@ echo "アプリインベントリを作成中..."
   # brew list --cask の出力はパッケージ名（例: google-chrome）のみ
   # /Applications の .app 名（例: Google Chrome.app）と突き合わせるために
   # cask のインストール先ディレクトリ情報を利用する
+  # 構造化出力（--json=v2）の "app":["xxx.app"] から抽出する。
+  # 人間向け表示のパースはHomebrewの表示形式変更で壊れやすいため避ける。
+  # それでも推定であり、cask定義にappアーティファクトがない場合は取得できない。
   cask_apps=""
   if command -v brew >/dev/null 2>&1; then
     for cask in $(brew list --cask 2>/dev/null); do
-      # brew info --cask で実際の .app 名を取得
-      app_name=$(brew info --cask "$cask" 2>/dev/null \
-        | grep -E '\.app' \
-        | grep -oE '[^/]+\.app' \
-        | head -1)
+      app_name=$(brew info --cask "$cask" --json=v2 2>/dev/null \
+        | grep -o '"app":\["[^"]*"' \
+        | head -1 \
+        | sed -E 's/.*"app":\["([^"]*)"/\1/')
       if [ -n "$app_name" ]; then
         cask_apps="$(printf '%s\n%s' "$cask_apps" "$app_name")"
       fi
@@ -71,6 +73,12 @@ echo "アプリインベントリを作成中..."
   find /Applications -maxdepth 2 -name "*.app" -type d | while IFS= read -r app_path; do
     app_name=$(basename "$app_path")
     app_base="${app_name%.app}"
+
+    # macOS標準アプリ（com.apple.*）は手動インストール対象から除外
+    bundle_id=$(defaults read "$app_path/Contents/Info" CFBundleIdentifier 2>/dev/null || true)
+    case "$bundle_id" in
+      com.apple.*) continue ;;
+    esac
 
     # Cask管理かチェック（完全一致）
     if echo "$cask_apps" | grep -qFx "$app_name"; then

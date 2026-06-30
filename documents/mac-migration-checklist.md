@@ -50,8 +50,8 @@
 # mas をインストール（まだ入っていない場合）
 brew install mas
 
-# Apple ID でサインイン（初回のみ）
-mas signin
+# Apple ID でサインイン（初回のみ。メールアドレスを引数に渡す）
+mas signin your-apple-id@example.com
 ```
 
 #### Step 2: Brewfile の書き出し
