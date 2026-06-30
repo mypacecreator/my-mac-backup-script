@@ -53,9 +53,9 @@ echo "アプリインベントリを作成中..."
   if command -v brew >/dev/null 2>&1; then
     for cask in $(brew list --cask 2>/dev/null); do
       app_name=$(brew info --cask "$cask" --json=v2 2>/dev/null \
-        | grep -o '"app"[:,]\["[^"]*"' \
+        | grep -o '"app"[:,][[:space:]]*\["[^"]*"' \
         | head -1 \
-        | sed -E 's/.*"app"[:,]\["([^"]*)"/\1/')
+        | sed -E 's/.*"app"[:,][[:space:]]*\["([^"]*)"/\1/')
       if [ -n "$app_name" ]; then
         cask_apps="$(printf '%s\n%s' "$cask_apps" "$app_name")"
       fi
