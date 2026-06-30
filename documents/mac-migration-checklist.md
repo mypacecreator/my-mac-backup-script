@@ -28,17 +28,52 @@
 
 ## Phase 1：旧Macで事前準備する（新Mac購入後すぐ）
 
-### Homebrew 棚卸し
+### Homebrew 棚卸し・アプリインベントリ作成
+
+#### Brewfile に含まれるアプリ vs 含まれないアプリ
+
+`brew bundle dump` が出力するのは「Homebrew 経由でインストールしたもの」だけ。
+同じアプリでも、公式サイトからDMGで入れていた場合は Brewfile に出てこない。
+
+| 種別 | 例 | Brewfile 対応 |
+|---|---|---|
+| `brew formula`（CLIツール）| git, php, wp-cli, mas | ✅ 自動 |
+| `brew cask`（GUIアプリ）| Docker, Chrome 等 | ✅ Homebrewで入れた場合のみ |
+| `mas`（App Store）| Keynote, 1Password 等 | ✅ `mas` を入れていれば自動 |
+| DMG/PKG で直接インストール | VPN クライアント、専門ツール等 | ❌ 出てこない |
+
+#### Step 1: `mas` のインストール
+
+`mas` を入れておくと、App Store アプリも Brewfile に含まれるようになる。
 
 ```bash
-# インストール済み一覧を確認
-brew list
+# mas をインストール（まだ入っていない場合）
+brew install mas
 
-# Brewfileとして書き出し（Dropboxに保存）
-brew bundle dump --file=~/Dropbox/mac-setup/Brewfile
+# Apple ID でサインイン（初回のみ）
+mas signin
+```
+
+#### Step 2: Brewfile の書き出し
+
+```bash
+# Brewfile を書き出し（mas アプリも自動的に含まれる）
+brew bundle dump --file=~/Dropbox/mac-setup/Brewfile --force
 ```
 
 → Brewfileを開いて、**不要なものを削除してから保存**する（クリーンインストールの利点を活かす）
+
+#### Step 3: 手動インストールアプリの洗い出し
+
+Brewfile（Cask + MAS）に含まれない `/Applications` のアプリを確認する。
+
+```bash
+sh scripts/app-list-export.sh
+# → ~/Dropbox/mac-setup/app-inventory.txt に保存される
+```
+
+`app-inventory.txt` の `[3] 手動インストールアプリ` を開いて、各アプリをメモしておく。  
+新Macでは MAS または Homebrew Cask への移行を検討する（次フェーズで対応）。
 
 ---
 
@@ -247,14 +282,23 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 
 ### Step 3：Brewfile から環境を復元
 
+> ⚠️ MAS アプリのインストールには Apple ID でのサインインが必要。  
+> 事前に App Store アプリを開いてサインイン済みであることを確認すること。
+
 ```bash
 brew bundle install --file=~/Dropbox/mac-setup/Brewfile
 ```
+
+これにより、以下が一括でインストールされる：
+- CLI ツール（`brew formula`）
+- GUI アプリ（`brew cask`）
+- Mac App Store アプリ（`mas`）
 
 **wp-env用途を踏まえた推奨 Brewfile 構成例：**
 
 ```ruby
 brew "git"
+brew "mas"
 # node は Volta で管理するなら除外する（競合するため）
 brew "php"
 brew "composer"
@@ -265,9 +309,45 @@ cask "phpstorm"
 cask "google-chrome"
 cask "dropbox"
 # 他、必要なものを追加
+
+mas "Keynote", id: 409183694
+# 他の App Store アプリを追加
 ```
 
 > ⚠️ Voltaを使う場合、Brewfileに `brew "node"` を含めると競合する。どちらかに統一すること。
+
+---
+
+### Step 3.5：手動インストールアプリの整理
+
+旧Macで `app-inventory.txt` に記録した「手動インストールアプリ」を1件ずつ確認し、  
+できる限り MAS または Homebrew Cask による管理に移行する。
+
+```bash
+# MAS で検索
+mas search <アプリ名>
+# → 見つかった場合
+mas install <id>
+
+# Homebrew Cask で検索
+brew search --cask <アプリ名>
+# → 見つかった場合
+brew install --cask <アプリ名>
+
+# どちらでもなければ公式サイトから手動インストール
+```
+
+新Macで MAS または Cask からインストールできたアプリは Brewfile に追記しておく：
+
+```bash
+# 現在の状態から Brewfile を更新
+brew bundle dump --file=~/Dropbox/mac-setup/Brewfile --force
+
+# Brewfile の内容を確認・整理してから保存
+open ~/Dropbox/mac-setup/Brewfile
+```
+
+> 次回の移行時に自動化の範囲が広がる。
 
 ---
 
@@ -503,7 +583,9 @@ sudo vim /etc/hosts
 - [ ] `~/.gitconfig` を移行済み
 - [ ] `~/.gitignore_global` を移行済み
 - [ ] `~/.zshrc` / `~/.zprofile` を移行済み
-- [ ] Homebrew `Brewfile` を出力し、新Macで復元済み
+- [ ] `mas` をインストール済み・`app-list-export.sh` を実行して `app-inventory.txt` を作成済み
+- [ ] Homebrew `Brewfile` を出力し（MASアプリ含む）、新Macで復元済み
+- [ ] `app-inventory.txt` の手動インストールアプリを確認し、新Macで MAS/Cask/手動のいずれかで対応済み
 - [ ] Volta を新Macにインストールし、必要なNodeバージョンを入れ直した
 - [ ] Claude デスクトップの `claude_desktop_config.json` を移行済み
 - [ ] Claude デスクトップのMCPサーバーが正常に動いている（Web系・ローカル系）
