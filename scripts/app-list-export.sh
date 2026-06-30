@@ -44,16 +44,18 @@ echo "アプリインベントリを作成中..."
   # brew list --cask の出力はパッケージ名（例: google-chrome）のみ
   # /Applications の .app 名（例: Google Chrome.app）と突き合わせるために
   # cask のインストール先ディレクトリ情報を利用する
-  # 構造化出力（--json=v2）の "app":["xxx.app"] から抽出する。
+  # 構造化出力（--json=v2）の artifacts 内 "app" エントリから抽出する。
   # 人間向け表示のパースはHomebrewの表示形式変更で壊れやすいため避ける。
+  # artifacts の "app" は "app":["xxx.app"]（オブジェクト形式）と
+  # "app",["xxx.app"]（タプル形式）のいずれかになり得るため両対応で抽出する。
   # それでも推定であり、cask定義にappアーティファクトがない場合は取得できない。
   cask_apps=""
   if command -v brew >/dev/null 2>&1; then
     for cask in $(brew list --cask 2>/dev/null); do
       app_name=$(brew info --cask "$cask" --json=v2 2>/dev/null \
-        | grep -o '"app":\["[^"]*"' \
+        | grep -o '"app"[:,]\["[^"]*"' \
         | head -1 \
-        | sed -E 's/.*"app":\["([^"]*)"/\1/')
+        | sed -E 's/.*"app"[:,]\["([^"]*)"/\1/')
       if [ -n "$app_name" ]; then
         cask_apps="$(printf '%s\n%s' "$cask_apps" "$app_name")"
       fi
