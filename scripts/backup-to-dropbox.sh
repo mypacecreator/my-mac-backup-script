@@ -146,6 +146,27 @@ fi
 echo ""
 
 # ============================================================
+# MASアプリ一覧記録
+# ============================================================
+
+echo "--- Mac App Store (mas) ------------------------------"
+if command -v mas >/dev/null 2>&1; then
+  mkdir -p "$DROPBOX_BASE"
+  if mas list > "$DROPBOX_BASE/mas-list.txt"; then
+    echo "[OK]   mas list -> $DROPBOX_BASE/mas-list.txt"
+    SUCCESS=$((SUCCESS + 1))
+  else
+    rm -f "$DROPBOX_BASE/mas-list.txt"
+    echo "[SKIP] mas list が失敗しました（未サインイン等の可能性。mas signin を確認してください）"
+    SKIP=$((SKIP + 1))
+  fi
+else
+  echo "[SKIP] mas がインストールされていません（brew install mas で導入可能）"
+  SKIP=$((SKIP + 1))
+fi
+echo ""
+
+# ============================================================
 # Voltaバージョン記録
 # ============================================================
 
