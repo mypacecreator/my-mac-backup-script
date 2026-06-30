@@ -66,29 +66,30 @@ $app_name"
   fi
 
   # /Applications 内の .app を走査して未管理のものを出力
-  found=0
-  for app_path in /Applications/*.app /Applications/**/*.app; do
-    [ -d "$app_path" ] || continue
+  # find で2階層分（直下 + サブフォルダ内）を再帰的に走査する
+  unmanaged_list=$(mktemp)
+  find /Applications -maxdepth 2 -name "*.app" -type d | while IFS= read -r app_path; do
     app_name=$(basename "$app_path")
     app_base="${app_name%.app}"
 
-    # Cask管理かチェック
-    if echo "$cask_apps" | grep -qF "$app_name"; then
+    # Cask管理かチェック（完全一致）
+    if echo "$cask_apps" | grep -qFx "$app_name"; then
       continue
     fi
 
-    # MAS管理かチェック（アプリ名の部分一致）
-    if echo "$mas_apps" | grep -qF "$app_base"; then
+    # MAS管理かチェック（アプリ名の完全一致）
+    if echo "$mas_apps" | grep -qFx "$app_base"; then
       continue
     fi
 
     echo "  - $app_base"
-    found=$((found + 1))
-  done
+  done > "$unmanaged_list"
+  cat "$unmanaged_list"
 
-  if [ "$found" -eq 0 ]; then
+  if [ ! -s "$unmanaged_list" ]; then
     echo "  (手動インストールアプリは見つかりませんでした)"
   fi
+  rm -f "$unmanaged_list"
 
   echo ""
   echo "================================================================"

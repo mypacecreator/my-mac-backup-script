@@ -152,9 +152,13 @@ echo ""
 echo "--- Mac App Store (mas) ------------------------------"
 if command -v mas >/dev/null 2>&1; then
   mkdir -p "$DROPBOX_BASE"
-  mas list > "$DROPBOX_BASE/mas-list.txt" 2>&1
-  echo "[OK]   mas list -> $DROPBOX_BASE/mas-list.txt"
-  SUCCESS=$((SUCCESS + 1))
+  if mas list > "$DROPBOX_BASE/mas-list.txt" 2>&1; then
+    echo "[OK]   mas list -> $DROPBOX_BASE/mas-list.txt"
+    SUCCESS=$((SUCCESS + 1))
+  else
+    echo "[SKIP] mas list が失敗しました（未サインイン等の可能性。mas signin を確認してください）"
+    SKIP=$((SKIP + 1))
+  fi
 else
   echo "[SKIP] mas がインストールされていません（brew install mas で導入可能）"
   SKIP=$((SKIP + 1))
