@@ -20,6 +20,7 @@ mac-dotfiles/
 ├── README.md
 └── scripts/
     ├── backup-to-dropbox.sh           # バックアップ実行スクリプト
+    ├── detect-manual-apps.sh          # 手動インストールアプリの検出スクリプト
     └── cleanup-dropbox-secrets.sh     # 移行後の秘密鍵削除スクリプト
 ```
 
@@ -31,7 +32,9 @@ mac-dotfiles/
 ├── ssh-backup/     # SSH鍵・config（⚠️ 秘密鍵含む）
 ├── claude/         # Claude設定・MCP設定
 ├── aws-backup/     # AWS CLI認証情報（⚠️ 認証情報含む）
-└── volta-versions.txt  # Voltaで管理しているNode等のバージョン一覧
+├── volta-versions.txt  # Voltaで管理しているNode等のバージョン一覧
+├── manual-apps.txt      # Homebrew管理外の手動インストールアプリ一覧
+└── brewfile-additions-candidate.txt  # Brewfile追記候補（cask名は推測）
 ```
 
 ---
@@ -46,6 +49,22 @@ sh scripts/backup-to-dropbox.sh
 
 実行前に警告メッセージと続行確認が表示されます。
 `y` を入力すると各ファイルのコピーが始まり、最後に成功・スキップ件数のサマリーが表示されます。
+
+### 手動インストールアプリの検出
+
+`/Applications` 以下のアプリのうち、Homebrew Cask・MASのどちらでも管理されていない
+「手動インストールアプリ」を洗い出します。Mac移行時に取りこぼしがちな
+手動インストールアプリを特定するために使います。`backup-to-dropbox.sh` とは独立しており、
+実行前後どちらのタイミングでも実行可能です。
+
+```sh
+sh scripts/detect-manual-apps.sh
+```
+
+検出結果は `~/Dropbox/mac-setup/manual-apps.txt` に保存されるほか、
+Brewfileへの追記候補（`cask "xxx"` 形式）が `~/Dropbox/mac-setup/brewfile-additions-candidate.txt`
+に出力されます。cask名はアプリ名からの機械的な推測のため、追記前に必ず
+`brew search --cask <アプリ名>` で正式名称を確認してください。
 
 ### 移行後のクリーンアップ（秘密鍵削除）
 
