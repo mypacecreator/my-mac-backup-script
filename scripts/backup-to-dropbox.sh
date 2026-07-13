@@ -36,7 +36,7 @@ copy_dir() {
     return
   fi
   mkdir -p "$dst"
-  cp -r "$src/." "$dst/"
+  cp -R "$src/." "$dst/"
   echo "[OK]   $src/ -> $dst/"
   SUCCESS=$((SUCCESS + 1))
 }
@@ -116,7 +116,7 @@ echo ""
 # ============================================================
 
 echo "--- claude -------------------------------------------"
-copy_dir  "$HOME/Library/Application Support/Claude" "$DROPBOX_BASE/claude/app-support"
+copy_file "$HOME/Library/Application Support/Claude/claude_desktop_config.json" "$DROPBOX_BASE/claude/claude_desktop_config.json"
 copy_file "$HOME/.claude.json"  "$DROPBOX_BASE/claude/.claude.json"
 copy_dir  "$HOME/.claude"       "$DROPBOX_BASE/claude/claude-dir"
 echo ""

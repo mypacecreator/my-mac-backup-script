@@ -129,7 +129,7 @@ cp ~/Library/Application\ Support/Claude/claude_desktop_config.json \
    ~/Dropbox/mac-setup/claude/
 
 # .claude/ フォルダ（Claude Code設定等）
-cp -r ~/.claude ~/Dropbox/mac-setup/claude/claude-dir
+cp -R ~/.claude ~/Dropbox/mac-setup/claude/claude-dir
 
 # .claude.json
 cp ~/.claude.json ~/Dropbox/mac-setup/claude/
@@ -144,7 +144,7 @@ cp ~/Dropbox/mac-setup/claude/claude_desktop_config.json \
    ~/Library/Application\ Support/Claude/
 
 # .claude/ フォルダを復元
-cp -r ~/Dropbox/mac-setup/claude/claude-dir ~/.claude
+cp -R ~/Dropbox/mac-setup/claude/claude-dir ~/.claude
 
 # .claude.json を復元
 cp ~/Dropbox/mac-setup/claude/.claude.json ~/
@@ -158,13 +158,13 @@ cp ~/Dropbox/mac-setup/claude/.claude.json ~/
 ### .aws のバックアップ（AWS CLI認証情報）
 
 ```bash
-cp -r ~/.aws ~/Dropbox/mac-setup/aws-backup
+cp -R ~/.aws ~/Dropbox/mac-setup/aws-backup
 ```
 
 **新Macでの復元：**
 
 ```bash
-cp -r ~/Dropbox/mac-setup/aws-backup ~/.aws
+cp -R ~/Dropbox/mac-setup/aws-backup ~/.aws
 chmod 600 ~/.aws/credentials
 ```
 
@@ -460,7 +460,7 @@ cp ~/Dropbox/mac-setup/claude/claude_desktop_config.json \
    ~/Library/Application\ Support/Claude/
 
 # .claude/ フォルダを復元
-cp -r ~/Dropbox/mac-setup/claude/claude-dir ~/.claude
+cp -R ~/Dropbox/mac-setup/claude/claude-dir ~/.claude
 
 # .claude.json を復元
 cp ~/Dropbox/mac-setup/claude/.claude.json ~/
@@ -474,7 +474,7 @@ Claude デスクトップを再起動して、MCPサーバーが認識される�
 ### Step 7.7：.aws の復元
 
 ```bash
-cp -r ~/Dropbox/mac-setup/aws-backup ~/.aws
+cp -R ~/Dropbox/mac-setup/aws-backup ~/.aws
 chmod 600 ~/.aws/credentials
 
 # 動作確認（AWS CLIが入っている場合）
